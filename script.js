@@ -139,12 +139,22 @@ function processInline(text) {
     
     // Links: [text](url) -> render as actual clickable link (this is the exception where we hide the syntax)
     result = result.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, (match, linkText, url) => {
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(linkText)}</a>`;
+        if (isSafeUrl(url)) {
+            return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(linkText)}</a>`;
+        } else {
+            // Unsafe URL: render as plain text
+            return `${escapeHtml(linkText)} (${escapeHtml(url)})`;
+        }
     });
     
     return result;
 }
 
+// Validate that a URL uses a safe protocol
+function isSafeUrl(url) {
+    // Only allow http, https, mailto protocols
+    return /^(https?:|mailto:)/i.test(url.trim());
+}
 // Escape HTML to prevent XSS
 function escapeHtml(text) {
     const div = document.createElement('div');
