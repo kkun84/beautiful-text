@@ -253,7 +253,19 @@ editor.addEventListener('input', () => {
 editor.addEventListener('paste', (e) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    // Remove current selection
+    selection.deleteFromDocument();
+    // Insert the plain text at the cursor
+    const range = selection.getRangeAt(0);
+    const textNode = document.createTextNode(text);
+    range.insertNode(textNode);
+    // Move the cursor after the inserted text
+    range.setStartAfter(textNode);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
 });
 
 // Initialize
